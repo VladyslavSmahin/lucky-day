@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import {useState, useRef, useEffect} from 'react';
 import './App.css';
 
 function App() {
@@ -18,6 +18,11 @@ function App() {
         }
     };
 
+    useEffect(() => {
+        console.log('messages:', messages);
+    }, [messages]);
+
+
     const sendMessage = async () => {
         if (!input.trim()) return;
 
@@ -35,7 +40,8 @@ function App() {
                 }),
             });
             const data = await res.json();
-            setMessages(prev => [...prev, { from: 'bot', text: data.reply || JSON.stringify(data) }]);
+            const replyText = Array.isArray(data) && data[0]?.output ? data[0].output : JSON.stringify(data);
+            setMessages(prev => [...prev, { from: 'bot', text: replyText }]);
             // eslint-disable-next-line no-unused-vars
         } catch (err) {
             setMessages(prev => [...prev, { from: 'bot', text: 'Ошибка запроса' }]);
@@ -75,7 +81,9 @@ function App() {
                         body: formData,
                     });
                     const data = await res.json();
-                    setMessages(prev => [...prev, { from: 'bot', text: data.reply || JSON.stringify(data) }]);
+                    const replyText = Array.isArray(data) && data[0]?.output ? data[0].output : JSON.stringify(data);
+                    setMessages(prev => [...prev, { from: 'bot', text: replyText }]);
+
                     // eslint-disable-next-line no-unused-vars
                 } catch (err) {
                     setMessages(prev => [...prev, { from: 'bot', text: 'Ошибка при отправке голоса' }]);
@@ -124,7 +132,7 @@ function App() {
                         {msg.audio ? (
                             <audio controls src={msg.audio} />
                         ) : (
-                            msg.text
+                            <span style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</span>
                         )}
                     </div>
                 ))}
