@@ -1,0 +1,77 @@
+.App {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    margin: auto;
+    padding: 2rem;
+    text-align: center;
+}
+.heygen-avatar{
+    width: 50%;
+    background: #575656;
+}
+.input-box{
+    width: 50%;
+}
+.chat {
+
+    border: 1px solid #ddd;
+    min-height: 600px;
+    height: 100%;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f9f9f9;
+
+    h1 {
+        color: #242424;
+    }
+}
+
+.msg {
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 6px;
+    max-width: 80%;
+}
+
+.msg.user {
+    background-color: #dcf8c6;
+    text-align: right;
+    margin-left: auto;
+    color: black;
+}
+
+.msg.bot {
+    background-color: #fff;
+    text-align: left;
+    margin-right: auto;
+    color: black;
+}
+
+.input-box {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #aaa;
+}

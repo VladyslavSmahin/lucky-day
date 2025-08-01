@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/front/.idea/n8n-chat.iml" filepath="$PROJECT_DIR$/front/.idea/n8n-chat.iml" />
+    </modules>
+  </component>
+</project>

@@ -6,10 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint ..",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.7.0",
+    "@heygen/streaming-avatar": "^2.0.16",
+    "livekit-client": "^2.13.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
