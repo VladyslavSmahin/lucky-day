@@ -1,12 +1,64 @@
-# React + Vite
+# 🧠 React Chat App with Voice & Text (n8n + ElevenLabs)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📦 Tech Stack
 
-Currently, two official plugins are available:
+- **React**
+- **n8n** (Webhook-based backend)
+- **ElevenLabs API** (Text-to-Speech)
+- **Web Audio API** (voice recording in browser)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Quick Start
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Install dependencies
+
+```
+\front>
+npm install
+npm run dev
+```
+
+```
+// API key for ElevenLabs TTS
+const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
+
+// ElevenLabs custom voice ID
+const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';
+
+// This is the endpoint where we send messages to our AI via n8n.
+// The AI processes the input and responds with a reply (text and optional speech).
+const N8N_WEBHOOK_URL = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-message';
+
+
+```
+
+## 💡 Features
+
+### 1. Username input
+
+The app prompts the user to enter a username on first load. This username is sent along with messages as `userId`.
+
+---
+
+### 2. Text messages
+
+- Sent via `POST` to your n8n webhook:
+
+```json
+{
+  "type": "text",
+  "message": "Hi there!",
+  "userId": "Vlad"
+}
+```
+The response format:
+
+```json
+[
+  {
+    "output": "Bot's text reply",
+    "speech": "Alternative voice text (optional)"
+  }
+]
+```
