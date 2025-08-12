@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import {useState, useRef, useEffect} from 'react';
 import './App.css';
 
-const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
-const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';
+/*const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
+const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';*/
 const N8N_WEBHOOK_URL = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-message';
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
-    const synthesizeSpeechElevenLabs = async (text) => {
+    /*const synthesizeSpeechElevenLabs = async (text) => {
         try {
             const response = await fetch(
                 `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
@@ -37,7 +37,7 @@ function App() {
             console.error('Ошибка синтеза речи:', error);
             return null;
         }
-    };
+    };*/
 
     const handleSetUsername = (e) => {
         e.preventDefault();
@@ -54,12 +54,12 @@ function App() {
         const replyText = data?.[0]?.output || '...';
         const speechText = data?.[0]?.speech || replyText;
 
-        addMessage({ from: 'bot', text: replyText });
+        addMessage({from: 'bot', text: replyText});
 
-        const audioUrl = await synthesizeSpeechElevenLabs(speechText);
+        /*const audioUrl = await synthesizeSpeechElevenLabs(speechText);
         if (audioUrl) {
             addMessage({ from: 'bot', audio: audioUrl });
-        }
+        }*/
     };
 
     const sendMessage = async () => {
@@ -67,13 +67,13 @@ function App() {
         if (!trimmedInput) return;
 
         setInput('');
-        addMessage({ from: 'user', text: trimmedInput });
+        addMessage({from: 'user', text: trimmedInput});
         setLoading(true);
 
         try {
             const res = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     type: 'text',
                     message: trimmedInput,
@@ -85,7 +85,7 @@ function App() {
             await handleBotReply(data);
         } catch (error) {
             console.error('Ошибка запроса:', error);
-            addMessage({ from: 'bot', text: 'Ошибка запроса' });
+            addMessage({from: 'bot', text: 'Ошибка запроса'});
         } finally {
             setLoading(false);
         }
@@ -93,7 +93,7 @@ function App() {
 
     const startRecording = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
             const mediaRecorder = new MediaRecorder(stream);
 
             audioChunksRef.current = [];
@@ -105,14 +105,14 @@ function App() {
             };
 
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const audioBlob = new Blob(audioChunksRef.current, {type: 'audio/webm'});
                 const formData = new FormData();
                 formData.append('data_voice', audioBlob, 'voice.webm');
                 formData.append('type', 'audio');
                 formData.append('userId', username);
 
                 const audioUrl = URL.createObjectURL(audioBlob);
-                addMessage({ from: 'user', audio: audioUrl });
+                addMessage({from: 'user', audio: audioUrl});
 
                 setLoading(true);
                 try {
@@ -125,7 +125,7 @@ function App() {
                     await handleBotReply(data);
                 } catch (error) {
                     console.error('Ошибка при отправке голоса:', error);
-                    addMessage({ from: 'bot', text: 'Ошибка при отправке голоса' });
+                    addMessage({from: 'bot', text: 'Ошибка при отправке голоса'});
                 } finally {
                     setLoading(false);
                 }
@@ -136,7 +136,7 @@ function App() {
             setRecording(true);
         } catch (err) {
             console.error('Не удалось начать запись:', err);
-            addMessage({ from: 'bot', text: 'Не удалось начать запись: ' + err.message });
+            addMessage({from: 'bot', text: 'Не удалось начать запись: ' + err.message});
         }
     };
 
@@ -147,10 +147,10 @@ function App() {
         }
     };
 
-    const Message = ({ from, text, audio }) => (
+    const Message = ({from, text, audio}) => (
         <div className={`msg ${from}`}>
-            <strong>{from === 'user' ? username : 'Роберт'}:</strong><br />
-            {audio ? <audio controls src={audio} /> : <span style={{ whiteSpace: 'pre-wrap' }}>{text}</span>}
+            <strong>{from === 'user' ? username : 'Роберт'}:</strong><br/>
+            {audio ? <audio controls src={audio}/> : <span style={{whiteSpace: 'pre-wrap'}}>{text}</span>}
         </div>
     );
 
@@ -199,7 +199,7 @@ function App() {
                 </button>
                 <button onClick={recording ? stopRecording : startRecording} disabled={loading}>
                     {recording ? '🛑 Стоп' : '🎙️ Говорить'}
-                    {recording && <span className="recording-dot" />}
+                    {recording && <span className="recording-dot"/>}
                 </button>
             </div>
         </div>
