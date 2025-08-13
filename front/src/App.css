@@ -12,6 +12,12 @@ html, body {
     padding: 0;
     height: 100vh;
 }
+.startFrom{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
 .heygen-avatar{
     width: 50%;
     background: #575656;

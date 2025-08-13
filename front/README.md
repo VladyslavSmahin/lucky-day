@@ -62,3 +62,15 @@ The response format:
   }
 ]
 ```
+Inputs id
+```
+ inputTOV  - set the tone of voice for chatting. we enter it once, but we transmit it every time,
+  we can replace it with a new value
+  
+  inputDailyInfo - answers from the daily quiz will shape the user's preferences. 
+ The data changes every day and will be updated automatically
+
+  msgInput - user's message
+  
+  
+```
