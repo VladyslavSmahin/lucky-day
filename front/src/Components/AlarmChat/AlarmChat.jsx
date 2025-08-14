@@ -34,6 +34,7 @@ export default function AlarmChat({ addMessage, handleBotReply,username, N8N_WEB
     return (
         <form onSubmit={sendAlarm}>
             <input
+                id="alarm-input"
                 value={alarmInput}
                 onChange={(e) => setAlarmInput(e.target.value)}
                 placeholder="Set your alarmInput"

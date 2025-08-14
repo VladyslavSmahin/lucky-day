@@ -34,6 +34,7 @@ export default function MotivationChat({ addMessage, handleBotReply,username, N8
     return (
         <form onSubmit={sendMotivation}>
             <input
+                id="motivation-input"
                 value={motivationInput}
                 onChange={(e) => setMotivationInput(e.target.value)}
                 placeholder="Set your motivationInput"

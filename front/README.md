@@ -20,17 +20,24 @@ npm run dev
 ```
 
 ```
+
+
+// This is the endpoint where we send messages to our AI via n8n.
+// The AI processes the input and responds with a reply (text and optional speech).
+const N8N_WEBHOOK_URL = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-message';
+
+// These are the endpoints where we send messages to receive alarm-msg and motivational-msg  text.
+const N8N_WEBHOOK_URL_ALARM = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-data-alarm';
+const N8N_WEBHOOK_URL_MOTIVATION = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-data-motivation';
+
 // API key for ElevenLabs TTS
 const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
 
 // ElevenLabs custom voice ID
 const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';
 
-// This is the endpoint where we send messages to our AI via n8n.
-// The AI processes the input and responds with a reply (text and optional speech).
-const N8N_WEBHOOK_URL = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-message';
-
-
+// The endpoint where we send a request for TTS 
+https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}
 ```
 
 ## 💡 Features
@@ -72,5 +79,7 @@ Inputs id
 
   msgInput - user's message
   
+  alarm-input - accepts a request for an audio file for the alarm
   
+  motivation-input - accepts request for motivational audio
 ```
