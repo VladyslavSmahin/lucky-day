@@ -1,25 +1,27 @@
 Project Overview
 This is a React-based chat application integrated with:
 n8n Webhook — for message processing and routing to AI.
-ElevenLabs API — for converting AI text responses into speech.
+ElevenLabs API — for converting AI text responses into speech.( but now we dont use it, its for next tusk )
 Web Audio API & MediaRecorder — for recording user voice and sending it as audio messages.
 
-Core Features
-Two-way communication — user can send text or voice, and receive AI responses in both text and audio format.
-Customizable Tone of Voice — user sets desired tone via an input field (TOV).
-Daily Info Context — stores and reuses user’s daily mood/context (inputDailyInfo) for more personalized replies.
-Memoized chat rendering — React.memo is used to optimize re-rendering and improve performance.
-Voice synthesis — AI responses are converted into audio using ElevenLabs API.
-Voice recording — browser microphone access is used to send audio messages to the AI.
 
+ We have a simple react application
 Flow
 User sets username, tone of voice, and daily info.
 User sends message (text or audio).
 n8n webhook processes the input, generates an AI response, and returns:
 Text output
 Optional separate speech text
-Frontend displays text, and optionally plays audio if speech synthesis is successful.
-Voice messages are recorded, sent as audio files, and receive an AI response in the same way.
+Voice messages are recorded, sent as audio files, and receive an AI response as text .
+
+Core Features
+Two-way communication — user can send text or voice, and receive AI responses in text format.
+Customizable Tone of Voice — user sets tone via an input field (TOV). The value is saved if it has not been changed.
+Daily Info Context — stores and reuses user’s daily mood/context (inputDailyInfo) for more personalized replies. This value is saved too  if it has not been changed.
+
+!!then I give the code, where everything is described in more detail in the comments to the code and the readme file
+
+
 
 Key Tech Stack
 Frontend: React (useState, useRef, memo), CSS
@@ -47,3 +49,7 @@ A: The app sends the existing stored inputDailyInfo value unless the user change
 
 Q7: Is this app mobile-friendly?
 A: Yes, it works on mobile browsers that support audio recording and playback.
+
+Memoized chat rendering — React.memo is used to optimize re-rendering and improve performance.
+Voice synthesis — AI responses are converted into audio using ElevenLabs API.
+Voice recording — browser microphone access is used to send audio messages to the AI.

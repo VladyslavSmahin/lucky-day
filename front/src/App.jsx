@@ -1,26 +1,30 @@
-import {useState, useRef, memo} from 'react';
+import { useState, useRef, memo } from 'react';
 import './App.css';
+import AlarmChat from "./Components/AlarmChat/AlarmChat.jsx";
+import MotivationChat from "./Components/MotivationChat/MotivationChat.jsx";
 
 const N8N_WEBHOOK_URL = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-message';
+const N8N_WEBHOOK_URL_ALARM = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-data-alarm';
+const N8N_WEBHOOK_URL_MOTIVATION = 'https://t3d-projects.app.n8n.cloud/webhook/incoming-data-motivation';
 
-// 🔊 keys for ElevenLabs
-/*const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
-const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';*/
+// 🔊 ElevenLabs
+const ELEVENLABS_API_KEY = 'sk_2c7d605a06bef08acd46a55d5c14115c2480ae68c470c374';
+const ELEVENLABS_VOICE_ID = 'TERu3lB0KuECqdPTHehh';
 
 // Msg component
-const Message = ({from, text, audio, username}) => (
+const Message = ({ from, text, audio, username }) => (
     <div className={`msg ${from}`}>
-        <strong>{from === 'user' ? username : 'Robert'}:</strong><br/>
-        {audio ? <audio controls src={audio}/> : <span style={{whiteSpace: 'pre-wrap'}}>{text}</span>}
+        <strong>{from === 'user' ? username : 'Robert'}:</strong><br />
+        {audio ? <audio controls src={audio} /> : <span style={{ whiteSpace: 'pre-wrap' }}>{text}</span>}
     </div>
 );
 
-// Chat (memoized to avoid re-rendering every text input)
-const Chat = memo(function Chat({messages, loading, username}) {
+// Chat (memoized)
+const Chat = memo(function Chat({ messages, loading, username, className }) {
     return (
-        <div className="chat">
+        <div className={`chat ${className}`}>
             {messages.map((msg, i) => (
-                <Message key={i} {...msg} username={username}/>
+                <Message key={i} {...msg} username={username} />
             ))}
             {loading && (
                 <div className="msg bot">
@@ -36,15 +40,27 @@ function App() {
     const [inputUsername, setInputUsername] = useState('');
     const [inputTOV, setInputTOV] = useState('');
     const [inputDailyInfo, setInputDailyInfo] = useState([]);
+
+    // MAIN CHAT
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [recording, setRecording] = useState(false);
+
+    // ALARM CHAT
+    const [alarmMessages, setAlarmMessages] = useState([]);
+    const [loadingAlarm, setLoadingAlarm] = useState(false);
+
+    // MOTIVATION CHAT
+    const [motivationMessages, setMotivationMessages] = useState([]);
+    const [loadingMotivation, setLoadingMotivation] = useState(false);
+
     const [username, setUsername] = useState('');
+    const [recording, setRecording] = useState(false);
+
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
     // 🎤 Speech synthesis by ElevenLabs
-    /*const synthesizeSpeechElevenLabs = async (text) => {
+    const synthesizeSpeechElevenLabs = async (text) => {
         try {
             const response = await fetch(
                 `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
@@ -66,7 +82,7 @@ function App() {
             console.error('Ошибка синтеза речи:', error);
             return null;
         }
-    };*/
+    };
 
     const handleSetUsername = (e) => {
         e.preventDefault();
@@ -75,35 +91,42 @@ function App() {
         }
     };
 
-    const addMessage = (msg) => {
-        setMessages((prev) => [...prev, msg]);
+    const addMessage = (setter) => (msg) => {
+        setter((prev) => [...prev, msg]);
     };
 
-// 🗣 Bot response + voiceover
-    const handleBotReply = async (data) => {
-        const replyText = data?.[0]?.output || '...';
-        const speechText = data?.[0]?.speech || replyText;
+    // 🗣 Bot response + voiceover
+    const handleBotReply = (setter, useAudio = false) => async (data) => {
+        if (!data || !data[0]) return;
 
-        addMessage({from: 'bot', text: replyText});
+        const replyText = data[0].output || '...';
+        const speechText = data[0].speech || replyText;
 
-        /*const audioUrl = await synthesizeSpeechElevenLabs(speechText);
-        if (audioUrl) {
-            addMessage({from: 'bot', audio: audioUrl});
-        }*/
+        if (useAudio) {
+            const audioUrl = await synthesizeSpeechElevenLabs(speechText);
+            if (audioUrl) {
+                setter((prev) => [...prev, { from: 'bot', audio: audioUrl }]);
+                return; // не добавляем текст
+            }
+        }
+
+        setter((prev) => [...prev, { from: 'bot', text: replyText }]);
     };
 
+
+    // MAIN CHAT
     const sendMessage = async () => {
         const trimmedInput = input.trim();
         if (!trimmedInput) return;
 
         setInput('');
-        addMessage({from: 'user', text: trimmedInput});
+        addMessage(setMessages)({ from: 'user', text: trimmedInput });
         setLoading(true);
 
         try {
             const res = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'text',
                     message: trimmedInput,
@@ -114,59 +137,46 @@ function App() {
             });
 
             const data = await res.json();
-            await handleBotReply(data);
+            await handleBotReply(setMessages)(data);
         } catch (error) {
             console.error('Error:', error);
-            addMessage({from: 'bot', text: 'Error'});
+            addMessage(setMessages)({ from: 'bot', text: 'Error' });
         } finally {
             setLoading(false);
         }
     };
 
-// 🎙️ voice recording
+    // 🎙️ voice recording
     const startRecording = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-                ? 'audio/webm'
-                : 'audio/mp4'; //  Safari / iOS
-
-            const mediaRecorder = new MediaRecorder(stream, {mimeType});
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+            const mediaRecorder = new MediaRecorder(stream, { mimeType });
 
             audioChunksRef.current = [];
 
             mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
+                if (event.data.size > 0) audioChunksRef.current.push(event.data);
             };
 
             mediaRecorder.onstop = async () => {
-                // ✅ Используем тот же mimeType при создании Blob
-                const audioBlob = new Blob(audioChunksRef.current, {type: mimeType});
-
+                const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
                 const formData = new FormData();
                 formData.append('data_voice', audioBlob, `voice.${mimeType === 'audio/webm' ? 'webm' : 'mp4'}`);
                 formData.append('type', 'audio');
                 formData.append('userId', username);
 
-                // Локальное воспроизведение
                 const audioUrl = URL.createObjectURL(audioBlob);
-                addMessage({from: 'user', audio: audioUrl});
+                addMessage(setMessages)({ from: 'user', audio: audioUrl });
 
                 setLoading(true);
                 try {
-                    const res = await fetch(N8N_WEBHOOK_URL, {
-                        method: 'POST',
-                        body: formData,
-                    });
-
+                    const res = await fetch(N8N_WEBHOOK_URL, { method: 'POST', body: formData });
                     const data = await res.json();
-                    await handleBotReply(data);
+                    await handleBotReply(setMessages)(data);
                 } catch (error) {
                     console.error('sending voice Error:', error);
-                    addMessage({from: 'bot', text: 'sending voice Error'});
+                    addMessage(setMessages)({ from: 'bot', text: 'sending voice Error' });
                 } finally {
                     setLoading(false);
                 }
@@ -177,10 +187,9 @@ function App() {
             setRecording(true);
         } catch (err) {
             console.error('recording error:', err);
-            addMessage({from: 'bot', text: 'recording error: ' + err.message});
+            addMessage(setMessages)({ from: 'bot', text: 'recording error: ' + err.message });
         }
     };
-
 
     const stopRecording = () => {
         if (mediaRecorderRef.current) {
@@ -191,8 +200,8 @@ function App() {
 
     if (!username) {
         return (
-            <div className="App">
-                <h1>Введите ваше имя</h1>
+            <div className="App startPage">
+                <h1>Enter your name</h1>
                 <form className="startFrom" onSubmit={handleSetUsername}>
                     <input
                         id="name"
@@ -205,10 +214,9 @@ function App() {
                         id="inputTOV"
                         value={inputTOV}
                         onChange={(e) => setInputTOV(e.target.value)}
-                        placeholder="key words for ton of voice"
+                        placeholder="key words for tone of voice"
                     />
-                    <label htmlFor="inputDailyInfo">input for daily quiz (If the data is not updated, the agent will use
-                        the old data.)</label>
+                    <label htmlFor="inputDailyInfo">input for daily quiz</label>
                     <input
                         id="inputDailyInfo"
                         value={inputDailyInfo}
@@ -223,27 +231,63 @@ function App() {
 
     return (
         <div className="App">
-            <h1>n8n Чат ({username})</h1>
+            {/* MAIN CHAT */}
+            <div>
+                <h1>Main Chat ({username})</h1>
+                <Chat messages={messages} loading={loading} username={username} />
+                <div className="input-box">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) sendMessage();
+                        }}
+                        placeholder="Enter your message"
+                    />
+                    <button onClick={sendMessage} disabled={loading}>
+                        {loading ? '...' : 'Send'}
+                    </button>
+                   {/* <button onClick={recording ? stopRecording : startRecording} disabled={loading}>
+                        {recording ? '🛑 Stop' : '🎙️ Speak'}
+                        {recording && <span className="recording-dot" />}
+                    </button>*/}
+                </div>
+            </div>
 
-            <Chat messages={messages} loading={loading} username={username}/>
+            <div className="alarm-motivation-chat-wrapper">
+                {/* ALARM CHAT */}
+                <div className="alarm-chat-wrapper">
+                    <h1>Alarm Chat</h1>
+                    <Chat
+                        className="alarm-chat"
+                        messages={alarmMessages}
+                        loading={loadingAlarm}
+                        username={username}
+                    />
+                    <AlarmChat
+                        N8N_WEBHOOK_URL_ALARM={N8N_WEBHOOK_URL_ALARM}
+                        username={username}
+                        addMessage={addMessage(setAlarmMessages)}
+                        handleBotReply={handleBotReply(setAlarmMessages, true)}
+                    />
+                </div>
 
-            <div className="input-box">
-                <input
-                    id="msgInput"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.nativeEvent.isComposing) sendMessage();
-                    }}
-                    placeholder="Enter your message"
-                />
-                <button onClick={sendMessage} disabled={loading}>
-                    {loading ? '...' : 'Send'}
-                </button>
-                <button onClick={recording ? stopRecording : startRecording} disabled={loading}>
-                    {recording ? '🛑 Stop' : '🎙️ Speak'}
-                    {recording && <span className="recording-dot"/>}
-                </button>
+                {/* MOTIVATION CHAT */}
+                <div className="motivation-chat-wrapper">
+                    <h1>Motivation Chat</h1>
+                    <Chat
+                        className="motivation-chat"
+                        messages={motivationMessages}
+                        loading={loadingMotivation}
+                        username={username}
+                    />
+                    <MotivationChat
+                        N8N_WEBHOOK_URL_MOTIVATION={N8N_WEBHOOK_URL_MOTIVATION}
+                        username={username}
+                        addMessage={addMessage(setMotivationMessages)}
+                        handleBotReply={handleBotReply(setMotivationMessages, true)}
+                    />
+                </div>
             </div>
         </div>
     );
