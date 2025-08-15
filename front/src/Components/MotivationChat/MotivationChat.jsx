@@ -1,17 +1,13 @@
 // MotivationInput.jsx
 import { useState } from 'react';
 
-export default function MotivationChat({ addMessage, handleBotReply,username, N8N_WEBHOOK_URL_MOTIVATION }) {
+export default function MotivationChat({ addMessage, handleBotReply,username, N8N_WEBHOOK_URL_MOTIVATION, text }) {
     const [motivationInput, setMotivationInput] = useState('');
     const [loading, setLoading] = useState(false);
 
     const sendMotivation = async (e) => {
         e.preventDefault();
-        const text = motivationInput.trim();
-        if (!text) return;
 
-        setMotivationInput('');
-        addMessage({ from: 'user', text });
         setLoading(true);
 
         try {
@@ -33,12 +29,6 @@ export default function MotivationChat({ addMessage, handleBotReply,username, N8
 
     return (
         <form onSubmit={sendMotivation}>
-            <input
-                id="motivation-input"
-                value={motivationInput}
-                onChange={(e) => setMotivationInput(e.target.value)}
-                placeholder="Set your motivationInput"
-            />
             <button type="submit" disabled={loading}>
                 {loading ? '...' : 'Send'}
             </button>

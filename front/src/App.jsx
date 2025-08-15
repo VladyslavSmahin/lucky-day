@@ -96,7 +96,7 @@ function App() {
     };
 
     // 🗣 Bot response + voiceover
-    const handleBotReply = (setter, useAudio = false) => async (data) => {
+    const handleBotReply = (setter, useAudio = false, useText = true) => async (data) => {
         if (!data || !data[0]) return;
 
         const replyText = data[0].output || '...';
@@ -106,12 +106,15 @@ function App() {
             const audioUrl = await synthesizeSpeechElevenLabs(speechText);
             if (audioUrl) {
                 setter((prev) => [...prev, { from: 'bot', audio: audioUrl }]);
-                return; // не добавляем текст
+                if (!useText) return; // Если текст отключен, выходим
             }
         }
 
-        setter((prev) => [...prev, { from: 'bot', text: replyText }]);
+        if (useText) {
+            setter((prev) => [...prev, { from: 'bot', text: replyText }]);
+        }
     };
+
 
 
     // MAIN CHAT
@@ -265,10 +268,11 @@ function App() {
                         username={username}
                     />
                     <AlarmChat
+                        text={inputDailyInfo}
                         N8N_WEBHOOK_URL_ALARM={N8N_WEBHOOK_URL_ALARM}
                         username={username}
                         addMessage={addMessage(setAlarmMessages)}
-                        handleBotReply={handleBotReply(setAlarmMessages, true)}
+                        handleBotReply={handleBotReply(setAlarmMessages, true, false)}
                     />
                 </div>
 
@@ -282,10 +286,11 @@ function App() {
                         username={username}
                     />
                     <MotivationChat
+                        text={inputDailyInfo}
                         N8N_WEBHOOK_URL_MOTIVATION={N8N_WEBHOOK_URL_MOTIVATION}
                         username={username}
                         addMessage={addMessage(setMotivationMessages)}
-                        handleBotReply={handleBotReply(setMotivationMessages, true)}
+                        handleBotReply={handleBotReply(setMotivationMessages, true, true)}
                     />
                 </div>
             </div>

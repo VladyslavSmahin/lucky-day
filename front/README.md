@@ -79,7 +79,22 @@ Inputs id
 
   msgInput - user's message
   
-  alarm-input - accepts a request for an audio file for the alarm
-  
-  motivation-input - accepts request for motivational audio
 ```
+
+## AlarmChat and MotivationChat Components
+
+Both components are UI wrappers for sending a request to an **n8n** webhook and receiving a bot’s response.  
+They differ only in the API endpoint they call and their purpose:
+
+- **AlarmChat** — sends a signal/data for the **"alarm"** flow in n8n. ( audio )
+- **MotivationChat** — sends data to generate a **"motivational"** message (motivation flow in n8n). ( audio + text )
+
+---
+
+### General Behavior
+
+- The **Send** button triggers a `POST` request to the corresponding `N8N_WEBHOOK_URL_*`.
+- The request body contains:
+    - `type` — always `"text"`;
+    - `message` — the text taken from the inputDailyInfo;
+    - `userId` — the username, so n8n knows who to respond to.
